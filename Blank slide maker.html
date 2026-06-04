@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeShow Blank Slide Auto-Patcher</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 40px; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #5825f5; }
+        input[type="file"] { margin: 20px 0; }
+        button { background-color: #5825f5; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #4018c0; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #status { margin-top: 20px; font-weight: bold; color: #e62e4d; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>FreeShow Blank Slide Auto-Patcher</h2>
+    <p>Select your .show files. This script will automatically generate unique IDs, insert a blank slide at the beginning of the default layout, and package them into a ZIP file.</p>
+    
+    <input type="file" id="fileInput" multiple accept=".show">
+    <br>
+    <button id="processBtn">Process Files & Download ZIP</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    // Generates a random 11-character hex string exactly like FreeShow does
+    function generateFreeShowId() {
+        return Math.random().toString(16).substring(2, 13).padEnd(11, '0');
+    }
+
+    document.getElementById('processBtn').addEventListener('click', async () => {
+        const fileInput = document.getElementById('fileInput');
+        const statusDiv = document.getElementById('status');
+        const files = fileInput.files;
+
+        if (files.length === 0) {
+            statusDiv.innerText = "Please select at least one .show file first.";
+            statusDiv.style.color = "#e62e4d";
+            return;
+        }
+
+        const btn = document.getElementById('processBtn');
+        btn.disabled = true;
+        statusDiv.innerText = `Processing ${files.length} files... Please wait.`;
+        statusDiv.style.color = "#333";
+
+        const zip = new JSZip();
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const text = await file.text();
+            
+            try {
+                // FreeShow files are typically an array: ["ID", {show_data}]
+                let parsedData = JSON.parse(text);
+                let showData = parsedData[1]; 
+
+                // Generate completely unique IDs for this specific file's new slide
+                let newSlideId = generateFreeShowId();
+                let newItemId = generateFreeShowId();
+                let newGlobalGroupId = generateFreeShowId();
+
+                // 1. Create the blank slide object
+                const blankSlide = {
+                    "group": "Blank",
+                    "color": "#ff3856",
+                    "settings": { "template": "" },
+                    "notes": "",
+                    "items": [
+                        {
+                            "type": "text",
+                            "lines": [
+                                {
+                                    "align": "",
+                                    "text": [ { "style": "font-size: 100px;", "value": "" } ]
+                                }
+                            ],
+                            "style": "top:88px;left:50px;height:904px;width:1820px;",
+                            "align": "",
+                            "auto": false,
+                            "id": newItemId
+                        }
+                    ],
+                    "globalGroup": newGlobalGroupId,
+                    "children": []
+                };
+
+                // 2. Add it to the slides database
+                if (!showData.slides) showData.slides = {};
+                showData.slides[newSlideId] = blankSlide;
+
+                // 3. Find the active layout and insert the slide at the very beginning
+                let activeLayoutId = showData.settings?.activeLayout;
+                if (!activeLayoutId && showData.layouts) {
+                    activeLayoutId = Object.keys(showData.layouts)[0];
+                }
+
+                if (activeLayoutId && showData.layouts[activeLayoutId]) {
+                    showData.layouts[activeLayoutId].slides.unshift({ "id": newSlideId });
+                }
+
+                // Put the modified object back into the array structure and convert to string
+                parsedData[1] = showData;
+                const modifiedText = JSON.stringify(parsedData);
+
+                // Add to our ZIP file
+                zip.file(file.name, modifiedText);
+
+            } catch (err) {
+                console.error(`Error processing ${file.name}:`, err);
+            }
+        }
+
+        // Generate the ZIP file and trigger download
+        statusDiv.innerText = "Zipping files together... (this might take a few seconds)";
+        
+        zip.generateAsync({ type: "blob" }).then(function(content) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = "Patched_FreeShow_Songs.zip";
+            link.click();
+            
+            statusDiv.innerText = "Done! Your ZIP file has been downloaded.";
+            statusDiv.style.color = "#28a745";
+            btn.disabled = false;
+        });
+    });
+</script>
+
+</body>
+</html>
