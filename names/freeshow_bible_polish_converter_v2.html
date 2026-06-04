@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreeShow Bible: polskie nazwy ksiąg</title>
+  <style>
+    :root {
+      --bg: #080b10;
+      --panel: #111822;
+      --panel2: #0d131b;
+      --text: #eaf0f7;
+      --muted: #9ba8b8;
+      --accent: #38bdf8;
+      --accent2: #7dd3fc;
+      --border: #283446;
+      --ok: #86efac;
+      --warn: #fde68a;
+      --err: #fb7185;
+      --radius: 18px;
+      --shadow: 0 18px 55px rgba(0,0,0,.38);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px;
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(56,189,248,.16), transparent 30%),
+        radial-gradient(circle at 90% 100%, rgba(125,211,252,.08), transparent 35%),
+        var(--bg);
+    }
+
+    .wrap { max-width: 1180px; margin: 0 auto; }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: -0.045em;
+      line-height: 1.05;
+    }
+
+    .lead {
+      margin: 0 0 22px;
+      color: var(--muted);
+      max-width: 900px;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 430px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .drop {
+      background: var(--panel2);
+      border: 1.5px dashed #3d4d63;
+      border-radius: 16px;
+      padding: 26px;
+      text-align: center;
+      cursor: pointer;
+      outline: none;
+      transition: .15s ease;
+    }
+
+    .drop:hover, .drop.dragover {
+      border-color: var(--accent);
+      background: rgba(56,189,248,.075);
+      transform: translateY(-1px);
+    }
+
+    .drop strong { display: block; margin-bottom: 6px; font-size: 18px; }
+    .drop span { color: var(--muted); font-size: 14px; }
+    input[type="file"] { display: none; }
+
+    .field { margin-top: 14px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .field input[type="text"], .field select {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #080d14;
+      color: var(--text);
+      outline: none;
+      font: inherit;
+    }
+
+    .field input[type="text"]:focus, .field select:focus, textarea:focus {
+      border-color: rgba(125,211,252,.55);
+      box-shadow: 0 0 0 3px rgba(56,189,248,.12);
+    }
+
+    .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .checks {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.45;
+      user-select: none;
+    }
+
+    input[type="checkbox"] {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .buttons {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button, .buttonlink {
+      border: 1px solid var(--border);
+      background: #182231;
+      color: var(--text);
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 750;
+      font-family: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: .15s ease;
+    }
+
+    button:hover, .buttonlink:hover {
+      background: #1e2b3c;
+      border-color: #40536b;
+    }
+
+    .primary {
+      background: linear-gradient(180deg, #38bdf8, #0284c7);
+      color: #031018;
+      border-color: transparent;
+    }
+
+    .primary:hover { filter: brightness(1.07); }
+
+    button:disabled, .buttonlink.disabled {
+      opacity: .42;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 16px;
+      padding: 12px 13px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--muted);
+      line-height: 1.5;
+      white-space: pre-line;
+      font-size: 14px;
+    }
+
+    .status.ok { color: var(--ok); border-color: rgba(134,239,172,.35); }
+    .status.warn { color: var(--warn); border-color: rgba(253,230,138,.35); }
+    .status.err { color: var(--err); border-color: rgba(251,113,133,.35); }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 9px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 590px;
+      resize: vertical;
+      background: #06090d;
+      color: #dbeafe;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      outline: none;
+      font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    details { margin-top: 16px; }
+    summary { color: var(--accent2); cursor: pointer; font-weight: 800; }
+
+    .mapping {
+      margin-top: 10px;
+      max-height: 330px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #101722;
+      color: var(--text);
+      z-index: 1;
+    }
+
+    td { color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+
+    code {
+      background: rgba(255,255,255,.075);
+      color: #bae6fd;
+      padding: 2px 5px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>FreeShow Bible: nazwy ksiąg po polsku</h1>
+    <p class="lead">
+      Wgraj plik <code>.fsb</code>, <code>.txt</code> albo <code>.json</code>. Możesz wybrać styl nazw:
+      pełne nazwy, krótkie nazwy do szybkiego szukania podczas kazania albo bardzo krótkie skróty.
+      Strona działa lokalnie i zapisuje wynik z powrotem jako <code>.fsb</code>.
+    </p>
+
+    <section class="grid">
+      <div class="card">
+        <div id="drop" class="drop" tabindex="0">
+          <strong>Przeciągnij plik .fsb / .txt / .json</strong>
+          <span>albo kliknij, żeby wybrać plik</span>
+          <input id="fileInput" type="file" accept=".fsb,.txt,.json,text/plain,application/json" />
+        </div>
+
+        <div class="field">
+          <label for="bookStyle">Styl nazw ksiąg</label>
+          <select id="bookStyle">
+            <option value="short" selected>Krótkie — najlepsze do szybkiego szukania</option>
+            <option value="long">Pełne — np. Księga Rodzaju, Ewangelia Jana</option>
+            <option value="abbr">Skróty — np. Rdz, Wj, Mt, J</option>
+          </select>
+          <div class="hint" id="styleHint">
+            Krótkie nazwy są podobne do listy z obrazka, np. <code>1 Mojżeszowa</code>, <code>Mateusza</code>, <code>1 Jana</code>.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="bibleName">Nazwa całej Biblii</label>
+          <input id="bibleName" type="text" placeholder="np. Biblia Polska" />
+          <div class="hint">
+            To zmienia główne pole <code>"name"</code>, np. z <code>PolishBible</code> na własną nazwę.
+            Puste pole = nazwa Biblii bez zmian.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="outputExt">Rozszerzenie pobieranego pliku</label>
+          <select id="outputExt">
+            <option value="same">Takie samo jak oryginał</option>
+            <option value=".fsb" selected>.fsb — zalecane do FreeShow</option>
+            <option value=".txt">.txt</option>
+            <option value=".json">.json</option>
+          </select>
+        </div>
+
+        <div class="checks">
+          <label class="check">
+            <input id="prettyJson" type="checkbox" />
+            <span>Sformatuj JSON czytelnie. Wyłączone = kompaktowy zapis, zwykle bezpieczniejszy dla importu.</span>
+          </label>
+
+          <label class="check">
+            <input id="useAliases" type="checkbox" checked />
+            <span>Rozpoznawaj alternatywne nazwy, np. <code>Psalms</code>, <code>Song of Songs</code>, <code>Acts of the Apostles</code>.</span>
+          </label>
+        </div>
+
+        <div class="buttons">
+          <button id="convertBtn" class="primary" disabled>Zmień nazwy</button>
+          <a id="downloadLink" class="buttonlink disabled" href="#" download>Pobierz wynik</a>
+          <button id="copyBtn" disabled>Kopiuj</button>
+          <button id="clearBtn">Wyczyść</button>
+        </div>
+
+        <div id="status" class="status">Wgraj plik, żeby zacząć.</div>
+
+        <details>
+          <summary>Podgląd zamian dla wybranego stylu</summary>
+          <div class="mapping">
+            <table>
+              <thead><tr><th>Angielska nazwa</th><th>Polska nazwa</th></tr></thead>
+              <tbody id="mappingBody"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <div class="card">
+        <div class="topbar">
+          <h2>Podgląd / wynik</h2>
+          <span id="fileInfo" class="pill">brak pliku</span>
+        </div>
+        <textarea id="output" spellcheck="false" placeholder="Tutaj pojawi się plik albo wynik..."></textarea>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const ENGLISH_BOOKS = [
+      "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth",
+      "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah",
+      "Esther", "Job", "Psalm", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
+      "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah",
+      "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi",
+      "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians",
+      "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
+      "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter",
+      "1 John", "2 John", "3 John", "Jude", "Revelation"
+    ];
+
+    const NAME_STYLES = {
+      long: {
+        "Genesis": "Księga Rodzaju",
+        "Exodus": "Księga Wyjścia",
+        "Leviticus": "Księga Kapłańska",
+        "Numbers": "Księga Liczb",
+        "Deuteronomy": "Księga Powtórzonego Prawa",
+        "Joshua": "Księga Jozuego",
+        "Judges": "Księga Sędziów",
+        "Ruth": "Księga Rut",
+        "1 Samuel": "1 Księga Samuela",
+        "2 Samuel": "2 Księga Samuela",
+        "1 Kings": "1 Księga Królewska",
+        "2 Kings": "2 Księga Królewska",
+        "1 Chronicles": "1 Księga Kronik",
+        "2 Chronicles": "2 Księga Kronik",
+        "Ezra": "Księga Ezdrasza",
+        "Nehemiah": "Księga Nehemiasza",
+        "Esther": "Księga Estery",
+        "Job": "Księga Hioba",
+        "Psalm": "Księga Psalmów",
+        "Proverbs": "Księga Przysłów",
+        "Ecclesiastes": "Księga Kaznodziei Salomona",
+        "Song of Solomon": "Pieśń nad Pieśniami",
+        "Isaiah": "Księga Izajasza",
+        "Jeremiah": "Księga Jeremiasza",
+        "Lamentations": "Treny",
+        "Ezekiel": "Księga Ezechiela",
+        "Daniel": "Księga Daniela",
+        "Hosea": "Księga Ozeasza",
+        "Joel": "Księga Joela",
+        "Amos": "Księga Amosa",
+        "Obadiah": "Księga Abdiasza",
+        "Jonah": "Księga Jonasza",
+        "Micah": "Księga Micheasza",
+        "Nahum": "Księga Nahuma",
+        "Habakkuk": "Księga Habakuka",
+        "Zephaniah": "Księga Sofoniasza",
+        "Haggai": "Księga Aggeusza",
+        "Zechariah": "Księga Zachariasza",
+        "Malachi": "Księga Malachiasza",
+        "Matthew": "Ewangelia Mateusza",
+        "Mark": "Ewangelia Marka",
+        "Luke": "Ewangelia Łukasza",
+        "John": "Ewangelia Jana",
+        "Acts": "Dzieje Apostolskie",
+        "Romans": "List do Rzymian",
+        "1 Corinthians": "1 List do Koryntian",
+        "2 Corinthians": "2 List do Koryntian",
+        "Galatians": "List do Galatów",
+        "Ephesians": "List do Efezjan",
+        "Philippians": "List do Filipian",
+        "Colossians": "List do Kolosan",
+        "1 Thessalonians": "1 List do Tesaloniczan",
+        "2 Thessalonians": "2 List do Tesaloniczan",
+        "1 Timothy": "1 List do Tymoteusza",
+        "2 Timothy": "2 List do Tymoteusza",
+        "Titus": "List do Tytusa",
+        "Philemon": "List do Filemona",
+        "Hebrews": "List do Hebrajczyków",
+        "James": "List Jakuba",
+        "1 Peter": "1 List Piotra",
+        "2 Peter": "2 List Piotra",
+        "1 John": "1 List Jana",
+        "2 John": "2 List Jana",
+        "3 John": "3 List Jana",
+        "Jude": "List Judy",
+        "Revelation": "Objawienie Jana"
+      },
+
+      short: {
+        "Genesis": "1 Mojżeszowa",
+        "Exodus": "2 Mojżeszowa",
+        "Leviticus": "3 Mojżeszowa",
+        "Numbers": "4 Mojżeszowa",
+        "Deuteronomy": "5 Mojżeszowa",
+        "Joshua": "Jozuego",
+        "Judges": "Sędziów",
+        "Ruth": "Rut",
+        "1 Samuel": "1 Samuela",
+        "2 Samuel": "2 Samuela",
+        "1 Kings": "1 Królewska",
+        "2 Kings": "2 Królewska",
+        "1 Chronicles": "1 Kronik",
+        "2 Chronicles": "2 Kronik",
+        "Ezra": "Ezdrasza",
+        "Nehemiah": "Nehemiasza",
+        "Esther": "Estery",
+        "Job": "Hioba",
+        "Psalm": "Psalmów",
+        "Proverbs": "Przyp. Salomona",
+        "Ecclesiastes": "Kaznodziei Salomona",
+        "Song of Solomon": "Pieśń nad Pieśniami",
+        "Isaiah": "Izajasza",
+        "Jeremiah": "Jeremiasza",
+        "Lamentations": "Treny Jeremiasza",
+        "Ezekiel": "Ezechiela",
+        "Daniel": "Daniela",
+        "Hosea": "Ozeasza",
+        "Joel": "Joela",
+        "Amos": "Amosa",
+        "Obadiah": "Abdiasza",
+        "Jonah": "Jonasza",
+        "Micah": "Micheasza",
+        "Nahum": "Nahuma",
+        "Habakkuk": "Abakuka",
+        "Zephaniah": "Sofoniasza",
+        "Haggai": "Aggeusza",
+        "Zechariah": "Zachariasza",
+        "Malachi": "Malachiasza",
+        "Matthew": "Mateusza",
+        "Mark": "Marka",
+        "Luke": "Łukasza",
+        "John": "Jana",
+        "Acts": "Dzieje Apostolskie",
+        "Romans": "Rzymian",
+        "1 Corinthians": "1 Koryntian",
+        "2 Corinthians": "2 Koryntian",
+        "Galatians": "Galacjan",
+        "Ephesians": "Efezjan",
+        "Philippians": "Filipian",
+        "Colossians": "Kolosan",
+        "1 Thessalonians": "1 Tesaloniczan",
+        "2 Thessalonians": "2 Tesaloniczan",
+        "1 Timothy": "1 Tymoteusza",
+        "2 Timothy": "2 Tymoteusza",
+        "Titus": "Tytusa",
+        "Philemon": "Filemona",
+        "Hebrews": "Żydów",
+        "James": "Jakuba",
+        "1 Peter": "1 Piotra",
+        "2 Peter": "2 Piotra",
+        "1 John": "1 Jana",
+        "2 John": "2 Jana",
+        "3 John": "3 Jana",
+        "Jude": "Judy",
+        "Revelation": "Objawienie"
+      },
+
+      abbr: {
+        "Genesis": "Rdz",
+        "Exodus": "Wj",
+        "Leviticus": "Kpł",
+        "Numbers": "Lb",
+        "Deuteronomy": "Pwt",
+        "Joshua": "Joz",
+        "Judges": "Sdz",
+        "Ruth": "Rt",
+        "1 Samuel": "1 Sm",
+        "2 Samuel": "2 Sm",
+        "1 Kings": "1 Krl",
+        "2 Kings": "2 Krl",
+        "1 Chronicles": "1 Krn",
+        "2 Chronicles": "2 Krn",
+        "Ezra": "Ezd",
+        "Nehemiah": "Ne",
+        "Esther": "Est",
+        "Job": "Hi",
+        "Psalm": "Ps",
+        "Proverbs": "Prz",
+        "Ecclesiastes": "Koh",
+        "Song of Solomon": "Pnp",
+        "Isaiah": "Iz",
+        "Jeremiah": "Jr",
+        "Lamentations": "Lm",
+        "Ezekiel": "Ez",
+        "Daniel": "Dn",
+        "Hosea": "Oz",
+        "Joel": "Jl",
+        "Amos": "Am",
+        "Obadiah": "Ab",
+        "Jonah": "Jon",
+        "Micah": "Mi",
+        "Nahum": "Na",
+        "Habakkuk": "Ha",
+        "Zephaniah": "So",
+        "Haggai": "Ag",
+        "Zechariah": "Za",
+        "Malachi": "Ml",
+        "Matthew": "Mt",
+        "Mark": "Mk",
+        "Luke": "Łk",
+        "John": "J",
+        "Acts": "Dz",
+        "Romans": "Rz",
+        "1 Corinthians": "1 Kor",
+        "2 Corinthians": "2 Kor",
+        "Galatians": "Ga",
+        "Ephesians": "Ef",
+        "Philippians": "Flp",
+        "Colossians": "Kol",
+        "1 Thessalonians": "1 Tes",
+        "2 Thessalonians": "2 Tes",
+        "1 Timothy": "1 Tm",
+        "2 Timothy": "2 Tm",
+        "Titus": "Tt",
+        "Philemon": "Flm",
+        "Hebrews": "Hbr",
+        "James": "Jk",
+        "1 Peter": "1 P",
+        "2 Peter": "2 P",
+        "1 John": "1 J",
+        "2 John": "2 J",
+        "3 John": "3 J",
+        "Jude": "Jud",
+        "Revelation": "Ap"
+      }
+    };
+
+    const ALIASES = {
+      "Psalms": "Psalm",
+      "Song of Songs": "Song of Solomon",
+      "The Song of Solomon": "Song of Solomon",
+      "The Song of Songs": "Song of Solomon",
+      "Revelation of John": "Revelation",
+      "Apocalypse": "Revelation",
+      "Acts of the Apostles": "Acts"
+    };
+
+    let originalText = "";
+    let originalFileName = "bible.fsb";
+    let parsedJson = null;
+    let lastResult = "";
+
+    const els = {
+      fileInput: document.getElementById("fileInput"),
+      drop: document.getElementById("drop"),
+      bibleName: document.getElementById("bibleName"),
+      bookStyle: document.getElementById("bookStyle"),
+      styleHint: document.getElementById("styleHint"),
+      outputExt: document.getElementById("outputExt"),
+      prettyJson: document.getElementById("prettyJson"),
+      useAliases: document.getElementById("useAliases"),
+      convertBtn: document.getElementById("convertBtn"),
+      downloadLink: document.getElementById("downloadLink"),
+      copyBtn: document.getElementById("copyBtn"),
+      clearBtn: document.getElementById("clearBtn"),
+      status: document.getElementById("status"),
+      output: document.getElementById("output"),
+      fileInfo: document.getElementById("fileInfo"),
+      mappingBody: document.getElementById("mappingBody")
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function setStatus(message, type = "") {
+      els.status.textContent = message;
+      els.status.className = "status" + (type ? " " + type : "");
+    }
+
+    function getSelectedMap() {
+      const base = { ...NAME_STYLES[els.bookStyle.value] };
+
+      if (els.useAliases.checked) {
+        for (const [alias, canonical] of Object.entries(ALIASES)) {
+          base[alias] = NAME_STYLES[els.bookStyle.value][canonical];
+        }
+      }
+
+      return base;
+    }
+
+    function fillMapping() {
+      const map = NAME_STYLES[els.bookStyle.value];
+      els.mappingBody.innerHTML = ENGLISH_BOOKS
+        .map(eng => `<tr><td>${escapeHtml(eng)}</td><td>${escapeHtml(map[eng])}</td></tr>`)
+        .join("");
+
+      const hints = {
+        short: 'Krótkie nazwy są podobne do listy z obrazka, np. 1 Mojżeszowa, Mateusza, 1 Jana.',
+        long: 'Pełne nazwy są czytelne, ale dłuższe w wyszukiwarce, np. Księga Rodzaju, Ewangelia Jana.',
+        abbr: 'Skróty są najszybsze, ale trzeba je znać, np. Rdz, Mt, J, 1 Kor.'
+      };
+      els.styleHint.textContent = hints[els.bookStyle.value];
+    }
+
+    function stripBom(text) {
+      return text.replace(/^\uFEFF/, "");
+    }
+
+    function parseJsonLoose(text) {
+      return JSON.parse(stripBom(text).trim());
+    }
+
+    function findBibleObject(data) {
+      if (!data || typeof data !== "object") return null;
+      if (!Array.isArray(data) && Array.isArray(data.books)) return data;
+
+      if (Array.isArray(data)) {
+        for (const item of data) if (item && typeof item === "object" && Array.isArray(item.books)) return item;
+      } else {
+        for (const value of Object.values(data)) if (value && typeof value === "object" && Array.isArray(value.books)) return value;
+      }
+
+      return null;
+    }
+
+    function getBibleName(data) {
+      const obj = findBibleObject(data);
+      return obj && typeof obj.name === "string" ? obj.name : "";
+    }
+
+    function convertParsedJson(data, newBibleName, map) {
+      const clone = structuredClone(data);
+      const bibleObj = findBibleObject(clone);
+
+      let bibleNameChanged = false;
+      let bookNamesChanged = 0;
+
+      if (bibleObj && newBibleName.trim()) {
+        bibleObj.name = newBibleName.trim();
+        bibleNameChanged = true;
+      }
+
+      if (bibleObj && Array.isArray(bibleObj.books)) {
+        for (const book of bibleObj.books) {
+          if (book && typeof book.name === "string" && Object.prototype.hasOwnProperty.call(map, book.name)) {
+            book.name = map[book.name];
+            bookNamesChanged++;
+          }
+        }
+      } else {
+        walkAndReplaceBookNames(clone);
+      }
+
+      function walkAndReplaceBookNames(node) {
+        if (Array.isArray(node)) {
+          node.forEach(walkAndReplaceBookNames);
+          return;
+        }
+        if (!node || typeof node !== "object") return;
+
+        for (const key of Object.keys(node)) {
+          if (key === "name" && typeof node[key] === "string" && Object.prototype.hasOwnProperty.call(map, node[key])) {
+            node[key] = map[node[key]];
+            bookNamesChanged++;
+          } else {
+            walkAndReplaceBookNames(node[key]);
+          }
+        }
+      }
+
+      return { data: clone, bibleNameChanged, bookNamesChanged };
+    }
+
+    function regexEscape(text) {
+      return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function convertByRegex(text, newBibleName, map) {
+      let result = text;
+      let bibleNameChanged = false;
+      let bookNamesChanged = 0;
+
+      if (newBibleName.trim()) {
+        result = result.replace(/("name"\s*:\s*")([^"]*)(")/, (match, before, oldName, after) => {
+          bibleNameChanged = true;
+          return before + newBibleName.trim().replaceAll("\\", "\\\\").replaceAll('"', '\\"') + after;
+        });
+      }
+
+      const alternatives = Object.keys(map).sort((a, b) => b.length - a.length).map(regexEscape).join("|");
+      const re = new RegExp(`("name"\\s*:\\s*")(${alternatives})(")`, "g");
+
+      result = result.replace(re, (match, before, book, after) => {
+        bookNamesChanged++;
+        return before + map[book] + after;
+      });
+
+      return { result, bibleNameChanged, bookNamesChanged };
+    }
+
+    function getExt(filename) {
+      const m = filename.match(/(\.[^.\\/]+)$/);
+      return m ? m[1].toLowerCase() : ".fsb";
+    }
+
+    function getOutputFilename() {
+      const base = originalFileName.replace(/\.[^.\\/]+$/, "");
+      const selected = els.outputExt.value;
+      const ext = selected === "same" ? getExt(originalFileName) : selected;
+      return `${base}_polskie_nazwy_${els.bookStyle.value}${ext}`;
+    }
+
+    function makeDownload(text) {
+      if (els.downloadLink.href && els.downloadLink.href.startsWith("blob:")) {
+        URL.revokeObjectURL(els.downloadLink.href);
+      }
+
+      const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      els.downloadLink.href = url;
+      els.downloadLink.download = getOutputFilename();
+      els.downloadLink.classList.remove("disabled");
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+
+      originalFileName = file.name || "bible.fsb";
+      els.fileInfo.textContent = `${originalFileName} • ${(file.size / 1024).toFixed(1)} KB`;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        originalText = String(reader.result || "");
+        parsedJson = null;
+        lastResult = "";
+        els.output.value = originalText.length > 250000
+          ? originalText.slice(0, 250000) + "\n\n--- PODGLĄD SKRÓCONY: konwersja obejmie cały plik ---"
+          : originalText;
+
+        try {
+          parsedJson = parseJsonLoose(originalText);
+          const name = getBibleName(parsedJson);
+          if (name && !els.bibleName.value) els.bibleName.value = name;
+          setStatus(`Plik wygląda na poprawny JSON/FSB. Wykryta nazwa Biblii: ${name || "nie znaleziono"}.`, "ok");
+        } catch (err) {
+          setStatus("Plik wczytany, ale nie udało się sparsować go jako JSON. Spróbuję użyć trybu tekstowego.", "warn");
+        }
+
+        els.convertBtn.disabled = false;
+        els.copyBtn.disabled = true;
+        els.downloadLink.classList.add("disabled");
+
+        if (getExt(originalFileName) === ".fsb") {
+          els.outputExt.value = "same";
+        }
+      };
+
+      reader.onerror = () => setStatus("Nie udało się odczytać pliku.", "err");
+      reader.readAsText(file, "utf-8");
+    }
+
+    function convert() {
+      if (!originalText) {
+        setStatus("Najpierw wgraj plik.", "err");
+        return;
+      }
+
+      const map = getSelectedMap();
+      let bibleNameChanged = false;
+      let bookNamesChanged = 0;
+
+      try {
+        const data = parsedJson || parseJsonLoose(originalText);
+        const converted = convertParsedJson(data, els.bibleName.value, map);
+        bibleNameChanged = converted.bibleNameChanged;
+        bookNamesChanged = converted.bookNamesChanged;
+        lastResult = els.prettyJson.checked
+          ? JSON.stringify(converted.data, null, 2)
+          : JSON.stringify(converted.data);
+      } catch (err) {
+        const converted = convertByRegex(originalText, els.bibleName.value, map);
+        bibleNameChanged = converted.bibleNameChanged;
+        bookNamesChanged = converted.bookNamesChanged;
+        lastResult = converted.result;
+      }
+
+      els.output.value = lastResult;
+      makeDownload(lastResult);
+      els.copyBtn.disabled = false;
+
+      if (bookNamesChanged === 0 && !bibleNameChanged) {
+        setStatus("Nic nie zmieniono. Sprawdź, czy nazwy ksiąg są po angielsku albo wpisz nową nazwę Biblii.", "warn");
+      } else {
+        setStatus([
+          "Gotowe.",
+          `Styl nazw: ${els.bookStyle.options[els.bookStyle.selectedIndex].text}.`,
+          `Zmienione nazwy ksiąg: ${bookNamesChanged}.`,
+          `Zmieniona nazwa całej Biblii: ${bibleNameChanged ? "tak" : "nie"}.`,
+          `Plik do pobrania: ${getOutputFilename()}`
+        ].join("\n"), "ok");
+      }
+    }
+
+    els.drop.addEventListener("click", () => els.fileInput.click());
+    els.drop.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        els.fileInput.click();
+      }
+    });
+
+    els.fileInput.addEventListener("change", (e) => handleFile(e.target.files[0]));
+
+    ["dragenter", "dragover"].forEach(type => {
+      els.drop.addEventListener(type, (e) => {
+        e.preventDefault();
+        els.drop.classList.add("dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach(type => {
+      els.drop.addEventListener(type, (e) => {
+        e.preventDefault();
+        els.drop.classList.remove("dragover");
+      });
+    });
+
+    els.drop.addEventListener("drop", (e) => handleFile(e.dataTransfer.files[0]));
+    els.convertBtn.addEventListener("click", convert);
+
+    els.bookStyle.addEventListener("change", fillMapping);
+    els.useAliases.addEventListener("change", fillMapping);
+
+    els.copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(lastResult || els.output.value);
+        setStatus("Wynik skopiowany do schowka.", "ok");
+      } catch {
+        els.output.focus();
+        els.output.select();
+        setStatus("Nie udało się skopiować automatycznie. Tekst został zaznaczony, użyj Ctrl+C.", "warn");
+      }
+    });
+
+    els.clearBtn.addEventListener("click", () => {
+      originalText = "";
+      originalFileName = "bible.fsb";
+      parsedJson = null;
+      lastResult = "";
+      els.fileInput.value = "";
+      els.bibleName.value = "";
+      els.output.value = "";
+      els.fileInfo.textContent = "brak pliku";
+      els.convertBtn.disabled = true;
+      els.copyBtn.disabled = true;
+      els.downloadLink.classList.add("disabled");
+      setStatus("Wgraj plik, żeby zacząć.");
+    });
+
+    fillMapping();
+  </script>
+</body>
+</html>
