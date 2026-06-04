@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeShow Blank Slide Auto-Patcher v2</title>
+    <title>FreeShow Auto-Patcher v3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; padding: 40px; background-color: #f4f4f9; color: #333; }
         .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h2 { margin-top: 0; color: #5825f5; }
-        input[type="file"] { margin: 20px 0; }
-        button { background-color: #5825f5; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; transition: background 0.2s; }
+        
+        .control-group { margin: 20px 0; display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: bold; color: #444; }
+        select, input[type="file"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; }
+        
+        button { background-color: #5825f5; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
         button:hover { background-color: #4018c0; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
@@ -25,11 +29,30 @@
 <body>
 
 <div class="container">
-    <h2>FreeShow Auto-Patcher v2</h2>
-    <p>Select your .show files. The tool will skip files that already start with a Blank slide, patch the rest, and package everything into a single ZIP.</p>
+    <h2>FreeShow Auto-Patcher v3</h2>
+    <p>Select your slide group name, choose your .show files, and let the tool automatically insert empty start slides and zip them up.</p>
     
-    <input type="file" id="fileInput" multiple accept=".show">
-    <br>
+    <div class="control-group">
+        <label for="groupSelect">Choose the new slide's group name:</label>
+        <select id="groupSelect">
+            <option value="Break" selected>Break (Default)</option>
+            <option value="Blank">Blank</option>
+            <option value="Clear">Clear</option>
+            <option value="Interlude">Interlude</option>
+            <option value="Intro">Intro</option>
+            <option value="Outro">Outro</option>
+            <option value="Macro">Macro</option>
+            <option value="Trigger">Trigger</option>
+            <option value="Instrumental">Instrumental</option>
+            <option value="Background">Background</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label for="fileInput">Select .show files:</label>
+        <input type="file" id="fileInput" multiple accept=".show">
+    </div>
+    
     <button id="processBtn">Process Files & Download ZIP</button>
     
     <div class="progress-container" id="progressContainer">
@@ -39,7 +62,7 @@
         <div class="stats">
             <span id="progressText">0 / 0 files processed</span><br>
             <span id="patchedText" style="color: #28a745;">0 newly patched</span> | 
-            <span id="skippedText" style="color: #17a2b8;">0 skipped (already had blank)</span>
+            <span id="skippedText" style="color: #17a2b8;">0 skipped (already patched)</span>
         </div>
         <div id="statusMessage"></div>
     </div>
@@ -50,11 +73,11 @@
         return Math.random().toString(16).substring(2, 13).padEnd(11, '0');
     }
 
-    // Helper to allow the browser to update the UI during heavy loops
     const yieldToBrowser = () => new Promise(resolve => setTimeout(resolve, 0));
 
     document.getElementById('processBtn').addEventListener('click', async () => {
         const fileInput = document.getElementById('fileInput');
+        const groupSelect = document.getElementById('groupSelect').value;
         const files = fileInput.files;
 
         if (files.length === 0) {
@@ -62,7 +85,6 @@
             return;
         }
 
-        // UI Setup
         const btn = document.getElementById('processBtn');
         const progressContainer = document.getElementById('progressContainer');
         const progressBarFill = document.getElementById('progressBarFill');
@@ -88,35 +110,35 @@
                 let parsedData = JSON.parse(text);
                 let showData = parsedData[1]; 
 
-                // Find the active layout
                 let activeLayoutId = showData.settings?.activeLayout;
                 if (!activeLayoutId && showData.layouts) {
                     activeLayoutId = Object.keys(showData.layouts)[0];
                 }
 
-                // Check if the first slide is ALREADY a blank slide
+                // Check if already patched (matches selected option, Break, or Blank)
                 let isAlreadyPatched = false;
                 if (activeLayoutId && showData.layouts[activeLayoutId] && showData.layouts[activeLayoutId].slides.length > 0) {
                     const firstSlideId = showData.layouts[activeLayoutId].slides[0].id;
                     const firstSlideData = showData.slides[firstSlideId];
                     
-                    if (firstSlideData && firstSlideData.group === "Blank") {
-                        isAlreadyPatched = true;
+                    if (firstSlideData) {
+                        const existingGroup = firstSlideData.group;
+                        if (existingGroup === groupSelect || existingGroup === "Break" || existingGroup === "Blank") {
+                            isAlreadyPatched = true;
+                        }
                     }
                 }
 
                 if (isAlreadyPatched) {
                     skippedCount++;
-                    // Add the unmodified file to the zip so it's not lost
                     zip.file(file.name, text);
                 } else {
-                    // It needs patching!
                     let newSlideId = generateFreeShowId();
                     let newItemId = generateFreeShowId();
                     let newGlobalGroupId = generateFreeShowId();
 
                     const blankSlide = {
-                        "group": "Blank",
+                        "group": groupSelect, 
                         "color": "#ff3856",
                         "settings": { "template": "" },
                         "notes": "",
@@ -148,24 +170,21 @@
 
             } catch (err) {
                 console.error(`Error processing ${file.name}:`, err);
-                // If it fails to parse, just add the original file so it isn't lost
                 zip.file(file.name, text); 
             }
 
-            // Update Progress Bar UI every 10 files (keeps it fast but visually smooth)
             if (i % 10 === 0 || i === files.length - 1) {
                 let percent = Math.round(((i + 1) / files.length) * 100);
                 progressBarFill.style.width = percent + '%';
                 progressText.innerText = `${i + 1} / ${files.length} files processed`;
                 patchedText.innerText = `${newlyPatchedCount} newly patched`;
-                skippedText.innerText = `${skippedCount} skipped (already had blank)`;
+                skippedText.innerText = `${skippedCount} skipped (already patched)`;
                 await yieldToBrowser();
             }
         }
 
-        // Generate the ZIP file with its own progress tracker
         statusMessage.innerText = "Zipping files together... (this might take a minute for 4500 files)";
-        progressBarFill.style.backgroundColor = "#ffc107"; // Change to yellow for zipping phase
+        progressBarFill.style.backgroundColor = "#ffc107";
         progressBarFill.style.width = "0%";
 
         zip.generateAsync({ type: "blob" }, function updateCallback(metadata) {
@@ -178,7 +197,7 @@
             
             statusMessage.innerText = "Done! Your ZIP file has been downloaded.";
             statusMessage.style.color = "#28a745";
-            progressBarFill.style.backgroundColor = "#28a745"; // Change to green for done
+            progressBarFill.style.backgroundColor = "#28a745";
             btn.disabled = false;
         });
     });
